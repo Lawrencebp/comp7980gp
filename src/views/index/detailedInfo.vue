@@ -1,30 +1,45 @@
 <script setup>
 import {StarFilled} from '@element-plus/icons-vue'
 import oneCard from '@/components/oneCard.vue'
+import { ref,onMounted,provide } from "vue";
+import { useRoute } from "vue-router";
+import { getOneMovie } from "@/api/movie/index.js";
+import {currentDate, transformDate, transformTime} from "@/util/curDate.js";
+
+const route = useRoute()
+const movieData = ref({})
+const actorData = ref([])
+const isEmpty = ref(false)
+
+provide('isEmpty',isEmpty)
+
+onMounted(async () => {
+  const data = await getOneMovie(route.params.id)
+  actorData.value = data.actorData
+  movieData.value = data.movieData
+  isEmpty.value = new Date(movieData.value.movieDate) > currentDate
+  movieData.value.movieDuration = transformTime(movieData.value.movieDuration)
+  movieData.value.movieDate = transformDate(new Date(movieData.value.movieDate))
+})
 
 </script>
 
 <template>
   <div class="container" style="margin: 0 auto;">
     <div class="detail">
-      <img alt="..." src="../../assets/pic6jpg.jpg">
+      <img alt="..." :src="movieData.moviePoster">
       <div class="information" >
-        <div class="title">The Weather Man</div>
+        <div class="title">{{movieData.movieName}}</div>
         <div class="type_duration">
-          2h 1min | Plot, comedy |
-          <span class="time">22 August 2020</span>
+          {{ movieData.movieDuration }} | {{movieData.movieType}} |
+          <span class="time">{{ movieData.movieDate }}</span>
         </div>
-        <div class="describe">
-          "The Weather Man" is a 2005 film about David Spritz, a Chicago weatherman struggling with personal issues and
-          his quest for self-worth. Despite his professional success, David grapples with a failing marriage, estranged
-          children, and seeking his father's approval. The film explores themes of identity and the pursuit of
-          validation amidst life's challenges.
-        </div>
+        <div class="describe">{{movieData.movieDesc}}</div>
         <div class="score">
           <el-icon style="color: rgb(211,153,11);">
             <StarFilled/>
           </el-icon>
-          8.8
+          {{ movieData.movieScore }}
         </div>
       </div>
     </div>
@@ -35,59 +50,15 @@ import oneCard from '@/components/oneCard.vue'
     </div>
     <div style="width: 100%;">
       <div class="showing">
-        <one-card>
+        <one-card v-for="item in actorData" :key="item._id">
           <template #picture>
-            <img src="@/assets/human.jpg" alt="..."/>
+            <img :src="item.imgUrl" alt="..."/>
           </template>
           <template #movie>
-            Chris Evans
+            {{ item.actorname }}
           </template>
           <template #desc>
-            Caption America
-          </template>
-        </one-card>
-        <one-card>
-          <template #picture>
-            <img src="@/assets/human.jpg" alt="..."/>
-          </template>
-          <template #movie>
-            Chris Evans
-          </template>
-          <template #desc>
-            Caption America
-          </template>
-        </one-card>
-        <one-card>
-          <template #picture>
-            <img src="@/assets/human.jpg" alt="..."/>
-          </template>
-          <template #movie>
-            Chris Evans
-          </template>
-          <template #desc>
-            Caption America
-          </template>
-        </one-card>
-        <one-card>
-          <template #picture>
-            <img src="@/assets/human.jpg" alt="..."/>
-          </template>
-          <template #movie>
-            Chris Evans
-          </template>
-          <template #desc>
-            Caption America
-          </template>
-        </one-card>
-        <one-card>
-          <template #picture>
-            <img src="@/assets/human.jpg" alt="..."/>
-          </template>
-          <template #movie>
-            Chris Evans
-          </template>
-          <template #desc>
-            Caption America
+            {{ item.rolename }}
           </template>
         </one-card>
       </div>
@@ -97,7 +68,6 @@ import oneCard from '@/components/oneCard.vue'
 </template>
 
 <style scoped>
-
 .detail {
   width: 100%;
   height: 400px;
@@ -114,7 +84,7 @@ import oneCard from '@/components/oneCard.vue'
 }
 
 .information {
-  width: 50%;
+  width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -126,7 +96,7 @@ import oneCard from '@/components/oneCard.vue'
 }
 
 .information .type_duration {
-  font-size: 13px;
+  font-size: 16px;
 }
 
 .information .type_duration .time {
@@ -135,8 +105,9 @@ import oneCard from '@/components/oneCard.vue'
 }
 
 .information .describe {
+  width: 100%;
   font-size: 14px;
-  margin: 20px 0;
+  margin: 8px 0 20px;
   color: rgb(73, 84, 112);
 }
 .information .score{

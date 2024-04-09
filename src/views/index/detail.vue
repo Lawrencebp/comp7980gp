@@ -1,60 +1,64 @@
 <script setup>
-import {ref} from "vue";
+import {ref,onMounted,inject} from "vue";
 import {currentDate,transformDate} from "@/util/curDate.js";
 import router from "@/router/index.js";
+import {useRoute} from "vue-router";
+import {getOneMovieArrangement} from "@/api/movie/index.js";
 
-const date = ref('')
+const route = useRoute()
+const date = ref(transformDate(currentDate))
 const useDate = [transformDate(currentDate)]
-for(let i= 1;i<7;i++){
+const tableData = ref([])
+const isEmpty = inject('isEmpty')
+
+for(let i = 1; i < 3; i++){
   const t1 = new Date(currentDate.getTime() + i * 86400000)
   const final = transformDate(t1)
   useDate.push(final)
 }
+
 const isForbidden = value => {
   return !useDate.includes(transformDate(value))
 }
-const buy = () => {
-  router.push('booking')
+
+const buy = row => {
+  const query = {
+    theaterNumber:row.theater.match(/\d+/)[0],
+    startDate:new Date(date.value + ' ' + row.start),
+    movieId: route.params.id
+  }
+  router.push({
+    path:'/detailInfo/booking/' + route.params.id,
+    query
+  })
 }
-const tableData = [
-  {
-    theater: 'Theater 1',
-    price: '¥50',
-    start: '17:00',
-    end: '19:00'
-  },
-  {
-    theater: 'Theater 1',
-    price: '¥50',
-    start: '17:00',
-    end: '19:00'
-  },
-  {
-    theater: 'Theater 1',
-    price: '¥50',
-    start: '17:00',
-    end: '19:00'
-  },
-  {
-    theater: 'Theater 1',
-    price: '¥50',
-    start: '17:00',
-    end: '19:00'
-  },
-  {
-    theater: 'Theater 1',
-    price: '¥50',
-    start: '17:00',
-    end: '19:00'
-  },
-]
+
+const getInfo = async (value) => {
+  await render(value)
+}
+
+const render = async (date) => {
+  tableData.value = []
+  const Body =  { movieId: route.params.id, day:`${useDate.indexOf(date) + 1}` }
+  const data = await getOneMovieArrangement(Body)
+  data.arrangement.forEach(item => {
+    const {theater,start,end,price} = item
+    if (new Date(`${date} ${start}`) > currentDate) {
+      tableData.value.push({theater,start,end,price})
+    }
+  })
+}
+
+onMounted(async () => {
+  await render(transformDate(currentDate))
+})
 </script>
 
 <template>
   <div class="nav">
     Movie arrangement
   </div>
-  <div style="margin: 30px 0">
+  <div style="margin: 30px 0" v-if="!isEmpty">
     <el-date-picker
         type="date"
         placeholder="Pick a day"
@@ -62,9 +66,11 @@ const tableData = [
         value-format="YYYY-MM-DD"
         format="YYYY-MM-DD"
         :disabled-date="isForbidden"
+        :editable="false"
+        @change="getInfo"
     />
-  </div>
-  <el-table :data="tableData" style="width: 100%" table-layout="fixed" stripe>
+  </div  >
+  <el-table v-if="!isEmpty" :data="tableData" style="width: 100%" table-layout="fixed" stripe>
     <el-table-column label="Time">
       <template #default="obj">
         <div class="start">{{ obj.row.start }}</div>
@@ -74,11 +80,12 @@ const tableData = [
     <el-table-column label="Theater" prop="theater"/>
     <el-table-column label="Price" prop="price"/>
     <el-table-column>
-      <template #default>
-        <el-button type="danger" @click="buy">Buy</el-button>
+      <template #default="obj">
+        <el-button type="danger" @click="buy(obj.row)">Buy</el-button>
       </template>
     </el-table-column>
   </el-table>
+  <el-empty v-else description="Coming soon..." />
 </template>
 
 <style scoped>

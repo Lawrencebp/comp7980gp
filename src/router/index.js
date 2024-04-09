@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import {ElMessage} from "element-plus";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -13,24 +14,40 @@ const router = createRouter({
           component: () => import('@/views/index/introduce.vue')
         },
         {
+          path:'order',
+          component:() => import('@/views/order.vue')
+        },
+        {
           path:'detailInfo',
           component: () => import('@/views/index/detailedInfo.vue'),
-          redirect:'/detailInfo/detail',
+          redirect:'detail/:id',
           children: [
             {
-              path:'detail',
+              path:'detail/:id',
               component: () => import('@/views/index/detail.vue'),
             },
             {
-              path:'booking',
+              path:'booking/:id',
               component: () => import('@/views/index/booking.vue')
             }
           ]
         },
-
       ]
     }
   ]
+})
+
+router.beforeEach(to => {
+  if (to.path.includes('booking') || to.path.includes('order')){
+    if (!localStorage.getItem('token')){
+      ElMessage.error({
+        showClose: true,
+        duration:2000,
+        message: 'You are not logged in, please login'
+      })
+      return '/'
+    }
+  }
 })
 
 export default router
