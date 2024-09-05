@@ -26,38 +26,44 @@
 </template>
 
 <style scoped>
-.bone{
+.bone {
   flex: 0 0;
   margin-bottom: 20px;
   transition: all .3s;
   position: relative;
 }
-.bone:hover{
+
+.bone:hover {
   cursor: pointer;
   transform: scale(1.1);
 }
+
 .pic {
   width: 220px;
   height: 240px;
 }
+
 img {
   width: 100%;
   height: 100%;
   border-radius: 4px;
 }
+
 .name {
   width: 220px;
   font-size: 14px;
 }
+
 .desc {
   width: 220px;
   font-size: 12px;
   color: rgb(73, 84, 112);
 }
-.score{
+
+.score {
   font-size: 14px;
   font-weight: 600;
-  color: rgb(222,159,7);
+  color: rgb(222, 159, 7);
   position: absolute;
   bottom: 17%;
   right: 5%;

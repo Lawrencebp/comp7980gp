@@ -33,6 +33,22 @@ const router = createRouter({
           ]
         },
       ]
+    },
+    {
+      path:'/admin',
+      component: () => import('@/views/Administrator.vue'),
+    },
+    {
+      path:'/layout',
+      component: () => import('@/views/administrator/AdminLayout.vue'),
+      redirect:'/sched' +
+          'ule',
+      children:[
+        {
+          path:'/schedule',
+          component: () => import('@/views/administrator/EditSchedule.vue')
+        }
+      ]
     }
   ]
 })

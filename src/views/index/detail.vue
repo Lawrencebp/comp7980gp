@@ -41,6 +41,7 @@ const render = async (date) => {
   tableData.value = []
   const Body =  { movieId: route.params.id, day:`${useDate.indexOf(date) + 1}` }
   const data = await getOneMovieArrangement(Body)
+  console.log(data)
   data.arrangement.forEach(item => {
     const {theater,start,end,price} = item
     if (new Date(`${date} ${start}`) > currentDate) {

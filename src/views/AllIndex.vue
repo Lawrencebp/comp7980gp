@@ -1,5 +1,5 @@
 <script setup>
-import { ArrowDown, Iphone, Lock, User, Plus} from '@element-plus/icons-vue'
+import {ArrowDown, Iphone, Lock, User, Plus} from '@element-plus/icons-vue'
 import {ref} from "vue";
 import router from "@/router/index.js";
 import {startLogin, updateInfo, insertOne} from "@/api/user/index.js";
@@ -17,7 +17,7 @@ const updateImg = ref(`http://localhost:3000/updateImg?${new Date().getTime()}`)
 const registerImg = ref(`http://localhost:3000/key/updateImgNever?${new Date().getTime()}`)
 
 //token
-const token = ref({Authorization:localStorage.getItem('token') ? "Bearer " + localStorage.getItem('token').replace(/"/g,'') : '' })
+const token = ref({Authorization: localStorage.getItem('token') ? "Bearer " + localStorage.getItem('token').replace(/"/g, '') : ''})
 //头像地址
 const avatarUrl = ref(user.userAvatar || 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png')
 
@@ -187,42 +187,49 @@ const cancel = async () => {
 const login = async () => {
   try {
     await loginForm.value.validate()
+    allVisible.value.isVisible = false
+    const data = await startLogin(loginModel.value.username, loginModel.value.password)
+    ElMessage({
+      message: data.message,
+      type: 'success',
+      duration: 2000
+    })
+    avatarUrl.value = data.imgUrl
+    user.setUserAvatar(data.imgUrl)
+    localStorage.setItem('token', data.token)
+    user.setUserId(data.id)
+    loginForm.value.resetFields()
+    isToken.value = true
+    setTimeout(() => router.go(0), 2100)
+
   } catch (e) {
     return
   }
-  allVisible.value.isVisible = false
-  const data = await startLogin(loginModel.value.username, loginModel.value.password)
-  ElMessage({
-    message: data.message,
-    type: 'success',
-  })
-  avatarUrl.value = data.imgUrl
-  user.setUserAvatar(data.imgUrl)
-  localStorage.setItem('token', data.token)
-  user.setUserId(data.id)
-  loginForm.value.resetFields()
-  isToken.value = true
-  await router.go(0)
 }
 
 //进行注册，提交到后台
 const register = async () => {
   try {
     await registerForm.value.validate()
+    allVisible.value.isVisible = false
+    let submitData = registerModel.value
+    delete submitData.imgUrl
+    submitData.filename = filename.value
+    submitData.extend = extend.value
+    const result = await insertOne(submitData)
+    if (result.code === 200) {
+      ElMessage({
+        type: 'success',
+        message: result.message,
+        duration: 2000
+      })
+      setTimeout(() => router.go(0), 2100)
+    }
   } catch (e) {
     return
   }
-  allVisible.value.isVisible = false
-  let submitData = registerModel.value
-  delete submitData.imgUrl
-  submitData.filename = filename.value
-  submitData.extend = extend.value
-  const result = await insertOne(submitData)
-  ElMessage({
-    type: 'success',
-    message: result.message
-  })
-  await router.go(0)
+
+
 }
 
 //更新数据，提交到后台
@@ -275,9 +282,9 @@ const handleUploadSuccessUpdate = response => {
   avatarUrl.value = 'http://localhost:3000/images/avatar/' + response.data + `?${new Date().getTime()}`
   user.setUserAvatar(avatarUrl.value)
   ElMessage({
-    type:"success",
-    duration:2000,
-    message:'Update your avatar success '
+    type: "success",
+    duration: 2000,
+    message: 'Update your avatar success '
   })
 }
 
@@ -287,9 +294,9 @@ const handleUploadSuccessRegister = response => {
   filename.value = response.data.filename
   extend.value = response.data.extend
   ElMessage({
-    type:"success",
-    duration:2000,
-    message:'Update your avatar success '
+    type: "success",
+    duration: 2000,
+    message: 'Update your avatar success '
   })
 }
 
@@ -299,7 +306,7 @@ const isToken = ref(!!localStorage.getItem('token'))
 </script>
 
 <template>
-  <div class="container" style="margin: 0 auto">
+  <div class="container" style="width: 70%;margin: 0 auto">
     <el-container>
       <el-header class="head">
         <el-row justify="space-between" align="middle">
@@ -318,8 +325,10 @@ const isToken = ref(!!localStorage.getItem('token'))
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item :disabled="!isToken" @click="router.push('/order')">Order</el-dropdown-item>
-                  <el-dropdown-item @click="resetPassword" :disabled="!isToken">Update individual information</el-dropdown-item>
+                  <el-dropdown-item @click="resetPassword" :disabled="!isToken">Update individual information
+                  </el-dropdown-item>
                   <el-dropdown-item @click="exit">Exit Login</el-dropdown-item>
+                  <el-dropdown-item @click="router.push('/admin')">Administrator Login</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -504,7 +513,8 @@ img {
   width: 40px;
   height: 40px;
 }
-.logo:hover{
+
+.logo:hover {
   cursor: pointer;
 }
 </style>

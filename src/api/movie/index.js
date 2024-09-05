@@ -1,4 +1,4 @@
-import request from "@/util/axoisConfig.js";
+import {request} from "@/util/axoisConfig.js";
 
 export const getOneMovie = id => {
     return request.get(`/oneMovie/${id}`)

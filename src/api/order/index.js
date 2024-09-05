@@ -1,4 +1,4 @@
-import request from "@/util/axoisConfig.js";
+import {request} from "@/util/axoisConfig.js";
 
 export const getSeatInformation = data => {
     return request.post('/seatInformation',{

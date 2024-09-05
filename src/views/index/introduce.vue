@@ -32,10 +32,10 @@ const initChart = () => {
     },
     tooltip: {
       enabled: true,
-      theme:'dark',
-      style:{
-        fontSize:'20px',
-        color:'rgb(255,0,0)'
+      theme: 'dark',
+      style: {
+        fontSize: '20px',
+        color: 'rgb(255,0,0)'
       }
     },
     plotOptions: {
@@ -104,9 +104,9 @@ const initChart = () => {
       },
       tooltip: {
         enabled: true,
-        style:{
-          fontSize:'16px',
-          color:'rgb(0,0,0)'
+        style: {
+          fontSize: '16px',
+          color: 'rgb(0,0,0)'
         }
       },
     },
@@ -125,9 +125,9 @@ const initChart = () => {
       },
       tooltip: {
         enabled: true,
-        style:{
-          fontSize:'16px',
-          color:'rgb(0,0,0)'
+        style: {
+          fontSize: '16px',
+          color: 'rgb(0,0,0)'
         }
       },
     },
@@ -148,9 +148,13 @@ const initChart = () => {
 onMounted(async () => {
   const data = await getAllMovie()
   allData.value = data.movieText
+  console.log(allData.value)
   allData.value.forEach(item => {
     let temp = item.movieBoxOffice
-    temp = temp.replace('million', '')
+    if (temp) {
+      temp = temp.replace('million', '')
+    }
+
     yAxis.value.push(parseFloat(temp).toFixed(2))
     xAxis.value.push(item.movieName)
   })

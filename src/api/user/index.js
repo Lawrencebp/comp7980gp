@@ -1,4 +1,4 @@
-import request from "@/util/axoisConfig.js";
+import {request} from "@/util/axoisConfig.js";
 
 //登陆请求接口，需要username和password
 export const startLogin = (username,password) => {
